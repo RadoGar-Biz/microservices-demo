@@ -47,6 +47,9 @@ resource "aws_instance" "minimesos" {
       "/tmp/provision.sh"
     ]
   }
+  metadata_options {
+    http_tokens = "required"
+  }
 }
 
 
