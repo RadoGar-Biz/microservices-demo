@@ -6,10 +6,10 @@ resource "aws_security_group" "k8s-security-group" {
   name        = "md-k8s-security-group"
   description = "allow all internal traffic, ssh, http from anywhere"
   ingress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    self        = "true"
+    from_port = 0
+    to_port   = 0
+    protocol  = "-1"
+    self      = "true"
   }
   ingress {
     from_port   = 22
@@ -42,16 +42,22 @@ resource "aws_security_group" "k8s-security-group" {
     cidr_blocks = ["0.0.0.0/0"]
   }
   ingress {
-   from_port   = 31601
-   to_port     = 31601
-   protocol    = "tcp"
-   cidr_blocks = ["0.0.0.0/0"]
- }
+    from_port   = 31601
+    to_port     = 31601
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
   egress {
     from_port   = 0
     to_port     = 0
     protocol    = "-1"
     cidr_blocks = ["0.0.0.0/0"]
+  }
+  tags = {
+    Owner     = "RGA"
+    git_org   = "RadoGar-Biz"
+    git_repo  = "microservices-demo"
+    yor_trace = "feb89000-c788-49a3-a35d-cfbfbe850f59"
   }
 }
 
@@ -65,12 +71,12 @@ resource "aws_instance" "ci-sockshop-k8s-master" {
   }
 
   connection {
-    user = "ubuntu"
+    user        = "ubuntu"
     private_key = "${file("${var.private_key_path}")}"
   }
 
   provisioner "file" {
-    source = "deploy/kubernetes/manifests"
+    source      = "deploy/kubernetes/manifests"
     destination = "/tmp/"
   }
 
@@ -82,6 +88,12 @@ resource "aws_instance" "ci-sockshop-k8s-master" {
       "sudo apt-get install -y docker.io",
       "sudo apt-get install -y kubelet kubeadm kubectl kubernetes-cni"
     ]
+  }
+  tags = {
+    Owner     = "RGA"
+    git_org   = "RadoGar-Biz"
+    git_repo  = "microservices-demo"
+    yor_trace = "fa515aa5-2039-4dab-bb42-6cf433326841"
   }
 }
 
@@ -96,7 +108,7 @@ resource "aws_instance" "ci-sockshop-k8s-node" {
   }
 
   connection {
-    user = "ubuntu"
+    user        = "ubuntu"
     private_key = "${file("${var.private_key_path}")}"
   }
 
@@ -110,27 +122,39 @@ resource "aws_instance" "ci-sockshop-k8s-node" {
       "sudo sysctl -w vm.max_map_count=262144"
     ]
   }
+  tags = {
+    Owner     = "RGA"
+    git_org   = "RadoGar-Biz"
+    git_repo  = "microservices-demo"
+    yor_trace = "dc5f6f3d-1329-43fa-bd0d-5fd4a03f9355"
+  }
 }
 
 resource "aws_elb" "ci-sockshop-k8s-elb" {
-  depends_on = [ "aws_instance.ci-sockshop-k8s-node" ]
-  name = "ci-sockshop-k8s-elb"
-  instances = ["${aws_instance.ci-sockshop-k8s-node.*.id}"]
+  depends_on         = ["aws_instance.ci-sockshop-k8s-node"]
+  name               = "ci-sockshop-k8s-elb"
+  instances          = ["${aws_instance.ci-sockshop-k8s-node.*.id}"]
   availability_zones = ["${data.aws_availability_zones.available.names}"]
-  security_groups = ["${aws_security_group.k8s-security-group.id}"] 
+  security_groups    = ["${aws_security_group.k8s-security-group.id}"]
   listener {
-    lb_port = 80
-    instance_port = 30001
-    lb_protocol = "http"
+    lb_port           = 80
+    instance_port     = 30001
+    lb_protocol       = "http"
     instance_protocol = "http"
   }
 
   listener {
-    lb_port = 9411
-    instance_port = 30002
-    lb_protocol = "http"
+    lb_port           = 9411
+    instance_port     = 30002
+    lb_protocol       = "http"
     instance_protocol = "http"
   }
 
+  tags = {
+    Owner     = "RGA"
+    git_org   = "RadoGar-Biz"
+    git_repo  = "microservices-demo"
+    yor_trace = "d2b599e9-1b08-4251-8903-ac8df1358cea"
+  }
 }
 
