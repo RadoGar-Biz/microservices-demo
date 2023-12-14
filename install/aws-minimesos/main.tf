@@ -6,8 +6,8 @@
 
 resource "aws_instance" "minimesos" {
 
-  count = 1
-  ami = "${lookup(var.aws_amis, var.aws_region)}"
+  count             = 1
+  ami               = "${lookup(var.aws_amis, var.aws_region)}"
   availability_zone = "eu-west-1b"
 
   root_block_device {
@@ -16,18 +16,18 @@ resource "aws_instance" "minimesos" {
   }
 
   instance_type = "m4.xlarge"
-  key_name = "${var.aws_key_name}"
-  subnet_id = "${aws_subnet.terraform.id}"
+  key_name      = "${var.aws_key_name}"
+  subnet_id     = "${aws_subnet.terraform.id}"
 
   vpc_security_group_ids = [
-    "${aws_security_group.terraform.id}"]
+  "${aws_security_group.terraform.id}"]
 
   tags {
     Name = "minimesos-${count.index}"
   }
 
   connection {
-    user = "ubuntu"
+    user        = "ubuntu"
     private_key = "${var.private_key_file}"
   }
 
@@ -37,7 +37,7 @@ resource "aws_instance" "minimesos" {
     ]
   }
   provisioner "file" {
-    source = "provision.sh"
+    source      = "provision.sh"
     destination = "/tmp/provision.sh"
   }
 
@@ -46,6 +46,12 @@ resource "aws_instance" "minimesos" {
       "chmod +x /tmp/provision.sh",
       "/tmp/provision.sh"
     ]
+  }
+  tags = {
+    Owner     = "RGA"
+    git_org   = "RadoGar-Biz"
+    git_repo  = "microservices-demo"
+    yor_trace = "effcccc4-044b-401b-9837-cefb64150a8a"
   }
 }
 
